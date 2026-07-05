@@ -1,0 +1,101 @@
+# Trader OS — v1.0 (Phase 1 / Sprint 1)
+
+یک PWA واقعی و قابل نصب برای مدیریت ذهن، بازار، اجرا و ژورنال معاملاتی.
+
+## راه‌اندازی
+
+```bash
+npm install
+npm run dev
+```
+
+سپس آدرس نمایش داده‌شده در ترمینال (پیش‌فرض `http://localhost:5173`) را باز کن.
+
+قبل از build نهایی، دو آیکن را داخل `public/icons/` قرار بده:
+`icon-192.png` و `icon-512.png` (توضیح در `public/icons/README.md`).
+
+```bash
+npm run build
+npm run preview   # تست نسخه build شده و قابلیت نصب PWA
+```
+
+## اتصال به Supabase (فقط دیتابیس، بدون Auth)
+
+**۱. یک پروژه در [supabase.com](https://supabase.com) بساز.**
+
+**۲. اسکیمای دیتابیس رو اجرا کن:**
+داخل پروژه Supabase برو به `SQL Editor` → `New query`، محتوای فایل
+`supabase/schema.sql` رو کپی کن و Run بزن. این کار چهار جدول
+(`journal_entries`, `checklist_items`, `knowledge_entries`,
+`statistics_snapshot`) رو با RLS باز (چون auth نداریم) می‌سازه.
+
+> ⚠️ چون login نداری، هرکسی که anon key رو داشته باشه می‌تونه بخونه/بنویسه.
+> این key همیشه داخل باندل فرانت‌اند قرار می‌گیره (طبیعتِ Supabase)، پس چیز
+> حساس داخل این جدول‌ها نذار. اگه بعداً چندکاربره شد، باید policy‌ها رو
+> محدود به `auth.uid()` کنی.
+
+**۳. کلیدها رو بردار:** `Project Settings → API` → کپی کن:
+- `Project URL`
+- `anon public` key
+
+**۴. فایل `.env` بساز:**
+
+```bash
+cp .env.example .env
+```
+
+و مقادیر داخلش رو با کلیدهای واقعی جایگزین کن.
+
+## اتصال به GitHub + دیپلوی خودکار روی GitHub Pages
+
+```bash
+git init
+git add .
+git commit -m "Trader OS — Sprint 1"
+git branch -M main
+git remote add origin https://github.com/USERNAME/REPO-NAME.git
+git push -u origin main
+```
+
+سپس:
+
+**۱. `vite.config.ts` رو باز کن** و `base: "/REPO-NAME/"` رو با نام واقعی
+ریپوی خودت جایگزین کن (مثلاً `base: "/trader-os/"`)، بعد کامیت و پوش کن.
+
+**۲. توی GitHub:** `Settings → Pages → Build and deployment → Source` رو
+روی **GitHub Actions** بذار.
+
+**۳. کلیدهای Supabase رو به‌عنوان Secret اضافه کن:**
+`Settings → Secrets and variables → Actions → New repository secret`
+- `VITE_SUPABASE_URL`
+- `VITE_SUPABASE_ANON_KEY`
+
+از این به بعد، هر پوش به شاخه `main` به‌صورت خودکار (`.github/workflows/deploy.yml`)
+build شده و روی `https://USERNAME.github.io/REPO-NAME/` منتشر می‌شه.
+
+## چه چیزی در Sprint 1 ساخته شده
+
+- ✅ راه‌اندازی پروژه: Vite + React 19 + TypeScript + TailwindCSS
+- ✅ PWA واقعی با `vite-plugin-pwa` (نصب روی ویندوز/اندروید، آفلاین)
+- ✅ Design System: رنگ‌ها، تایپوگرافی (Inter + JetBrains Mono)، Card/Button/Checkbox/Progress
+- ✅ قالب اصلی: Sidebar (icon rail) + Topbar
+- ✅ ناوبری بین ۱۰ ماژول با React Router
+- ✅ داشبورد کامل: Mental Score (radial gauge)، Market Trend، Today's Risk، Today's Goal، Trade Checklist
+- ✅ Zustand store برای state داشبورد
+- ✅ پایه IndexedDB (`src/lib/db.ts`) آماده برای Journal/Settings/Checklist/Knowledge/Statistics
+- ✅ پایه Supabase (`src/lib/supabaseClient.ts` + `supabase/schema.sql`) به‌عنوان دیتابیس آنلاین جایگزین/مکمل IndexedDB
+- ✅ GitHub Actions workflow برای دیپلوی خودکار روی GitHub Pages
+- 🔜 بقیه ماژول‌ها (Mind, Market, Analysis, Execution, Journal, Statistics, Knowledge, Settings) به‌صورت placeholder فعلاً وصل هستند و در Sprint بعدی محتوای واقعی می‌گیرند
+
+## طراحی
+
+الهام‌گرفته از TradingView / Notion / Raycast / Linear:
+
+- پس‌زمینه نزدیک به سیاه (`#0A0B0D`) با سطوح کارت روشن‌تر
+- رنگ اصلی آبی تحلیلی (`#4C7EFF`) + سبز/قرمز برای bullish/bearish
+- اعداد همیشه با فونت `JetBrains Mono` برای هم‌ترازی مثل ترمینال معاملاتی
+- Radial gauge به‌عنوان عنصر امضا برای نمایش وضعیت ذهنی
+
+## ساختار پروژه
+
+مطابق پلن اصلی: `src/{app,components,features,hooks,lib,store,services,types,utils,styles}`
