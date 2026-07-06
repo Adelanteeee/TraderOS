@@ -8,7 +8,7 @@ export default defineConfig({
   // so the app needs to know it isn't at the domain root. Replace REPO-NAME
   // with your actual GitHub repository name before deploying. Leave it as
   // "/" if you deploy somewhere else (Vercel, Netlify, a custom domain, ...).
-  base: "/",
+  base: "/TraderOS/",
   plugins: [
     react(),
     VitePWA({
