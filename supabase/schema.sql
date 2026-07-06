@@ -8,6 +8,7 @@ create table if not exists journal_entries (
   id uuid primary key default gen_random_uuid(),
   created_at timestamptz not null default now(),
   trade text not null default '',
+  outcome text not null default 'breakeven' check (outcome in ('win', 'loss', 'breakeven')),
   screenshot_url text,
   reason text not null default '',
   emotion text not null default '',
@@ -16,8 +17,11 @@ create table if not exists journal_entries (
   score int not null default 0 check (score between 0 and 100)
 );
 
--- Safe to re-run: adds the "trade" column if this table already existed from Sprint 1
+-- Safe to re-run: adds the "trade"/"outcome" columns if this table already existed from earlier sprints
 alter table journal_entries add column if not exists trade text not null default '';
+alter table journal_entries add column if not exists outcome text not null default 'breakeven';
+alter table journal_entries drop constraint if exists journal_entries_outcome_check;
+alter table journal_entries add constraint journal_entries_outcome_check check (outcome in ('win', 'loss', 'breakeven'));
 
 -- Execution checklist items (the 10-step pre-trade checklist)
 create table if not exists checklist_items (

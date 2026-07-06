@@ -4,6 +4,7 @@ export interface JournalEntry {
   id: string;
   createdAt: string;
   trade: string;
+  outcome: "win" | "loss" | "breakeven";
   screenshotUrl: string;
   reason: string;
   emotion: string;
@@ -16,6 +17,7 @@ interface JournalEntryRow {
   id: string;
   created_at: string;
   trade: string;
+  outcome: "win" | "loss" | "breakeven";
   screenshot_url: string | null;
   reason: string;
   emotion: string;
@@ -29,6 +31,7 @@ function toEntry(row: JournalEntryRow): JournalEntry {
     id: row.id,
     createdAt: row.created_at,
     trade: row.trade,
+    outcome: row.outcome,
     screenshotUrl: row.screenshot_url ?? "",
     reason: row.reason,
     emotion: row.emotion,
@@ -54,6 +57,7 @@ export async function addJournalEntry(
     .from("journal_entries")
     .insert({
       trade: input.trade,
+      outcome: input.outcome,
       screenshot_url: input.screenshotUrl || null,
       reason: input.reason,
       emotion: input.emotion,

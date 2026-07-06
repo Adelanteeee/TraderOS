@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { z } from "zod";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Trash2, ImageIcon } from "lucide-react";
+import { Trash2, ImageIcon, TrendingUp, TrendingDown, Minus } from "lucide-react";
+import clsx from "clsx";
 import { Card } from "@/components/Card/Card";
 import { Button } from "@/components/Button/Button";
 import {
@@ -12,8 +13,15 @@ import {
   type JournalEntry
 } from "@/services/journalService";
 
+const OUTCOME_META = {
+  win: { label: "برد", icon: TrendingUp, tone: "text-bull bg-bull-soft" },
+  loss: { label: "باخت", icon: TrendingDown, tone: "text-bear bg-bear-soft" },
+  breakeven: { label: "سربه‌سر", icon: Minus, tone: "text-gold bg-gold-soft" }
+} as const;
+
 const schema = z.object({
   trade: z.string().min(1, "نام یا نماد معامله را وارد کن"),
+  outcome: z.enum(["win", "loss", "breakeven"]),
   screenshotUrl: z.string().max(500).optional().default(""),
   reason: z.string().max(500).optional().default(""),
   emotion: z.string().max(200).optional().default(""),
@@ -28,10 +36,11 @@ export function Journal() {
   const [entries, setEntries] = useState<JournalEntry[]>([]);
   const [offline, setOffline] = useState(false);
 
-  const { register, handleSubmit, reset, formState } = useForm<FormValues>({
+  const { register, control, handleSubmit, reset, formState } = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: {
       trade: "",
+      outcome: "win",
       screenshotUrl: "",
       reason: "",
       emotion: "",
@@ -89,6 +98,38 @@ export function Journal() {
             {formState.errors.trade && (
               <span className="text-xs text-bear">{formState.errors.trade.message}</span>
             )}
+          </div>
+
+          <div className="flex flex-col gap-1 sm:col-span-2">
+            <label className="text-xs text-text-muted">نتیجه</label>
+            <Controller
+              name="outcome"
+              control={control}
+              render={({ field }) => (
+                <div className="flex gap-2">
+                  {(Object.keys(OUTCOME_META) as (keyof typeof OUTCOME_META)[]).map((key) => {
+                    const meta = OUTCOME_META[key];
+                    const Icon = meta.icon;
+                    return (
+                      <button
+                        key={key}
+                        type="button"
+                        onClick={() => field.onChange(key)}
+                        className={clsx(
+                          "flex flex-1 items-center justify-center gap-1.5 rounded-xl border py-2 text-xs transition-colors",
+                          field.value === key
+                            ? clsx(meta.tone, "border-transparent")
+                            : "border-border text-text-muted hover:text-text-secondary"
+                        )}
+                      >
+                        <Icon size={14} />
+                        {meta.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            />
           </div>
 
           <div className="flex flex-col gap-1">
@@ -167,6 +208,16 @@ export function Journal() {
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2 flex-wrap">
                   <span className="text-sm font-semibold text-text-primary">{entry.trade}</span>
+                  {(() => {
+                    const meta = OUTCOME_META[entry.outcome];
+                    const Icon = meta.icon;
+                    return (
+                      <span className={clsx("flex items-center gap-1 rounded-lg px-2 py-0.5 text-xs", meta.tone)}>
+                        <Icon size={12} />
+                        {meta.label}
+                      </span>
+                    );
+                  })()}
                   <span className="num text-xs text-text-muted bg-surface-elevated rounded-lg px-2 py-0.5">
                     امتیاز {entry.score}
                   </span>

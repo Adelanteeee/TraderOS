@@ -22,8 +22,11 @@ export function Statistics() {
   const stats = useMemo(() => {
     const total = entries.length;
     const avgScore = average(entries.map((e) => e.score));
-    const wins = entries.filter((e) => e.score >= 50).length;
-    const winRate = total > 0 ? (wins / total) * 100 : 0;
+    const decided = entries.filter((e) => e.outcome !== "breakeven").length;
+    const wins = entries.filter((e) => e.outcome === "win").length;
+    const losses = entries.filter((e) => e.outcome === "loss").length;
+    const breakeven = entries.filter((e) => e.outcome === "breakeven").length;
+    const winRate = decided > 0 ? (wins / decided) * 100 : 0;
 
     const emotionCounts = new Map<string, number>();
     entries.forEach((e) => {
@@ -34,7 +37,7 @@ export function Statistics() {
 
     const recent = [...entries].slice(0, 10).reverse();
 
-    return { total, avgScore, winRate, topEmotion, recent };
+    return { total, avgScore, winRate, wins, losses, breakeven, topEmotion, recent };
   }, [entries]);
 
   return (
@@ -65,7 +68,10 @@ export function Statistics() {
             <Trophy size={16} className="text-text-muted" />
             <span className="num text-2xl font-semibold text-text-primary">{stats.winRate.toFixed(0)}%</span>
           </div>
-          <p className="text-xs text-text-muted">امتیاز ≥ ۵۰ به‌عنوان معامله‌ی موفق حساب می‌شه</p>
+          <p className="text-xs text-text-muted">از بین معاملاتی که سربه‌سر نبودن</p>
+          <p className="num text-xs text-text-muted mt-1">
+            {stats.wins} برد · {stats.losses} باخت · {stats.breakeven} سربه‌سر
+          </p>
         </Card>
         <Card eyebrow="Emotion" title="پرتکرارترین احساس">
           <div className="flex items-center gap-2 py-1">
