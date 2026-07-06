@@ -1,5 +1,5 @@
 import { Card } from "@/components/Card/Card";
-import { ConceptNode } from "@/components/ConceptTree/ConceptNode";
+import { ConceptNode } from "./ConceptNode";
 import { MARKET_TAXONOMY } from "./marketTaxonomy";
 
 export function Market() {
