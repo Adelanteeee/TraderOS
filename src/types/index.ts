@@ -30,7 +30,6 @@ export interface DashboardSnapshot {
   checklistDone: number;
   checklistTotal: number;
 }
-<<<<<<< HEAD
 
 // ---- Sprint 2 ----
 
@@ -70,5 +69,3 @@ export interface AnalysisEntry {
   bias: "bullish" | "bearish" | "neutral";
   notes: string;
 }
-=======
->>>>>>> ec022f78c02aacb19aeb3d08cec633ca7a759ea8
