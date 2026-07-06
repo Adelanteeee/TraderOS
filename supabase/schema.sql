@@ -7,6 +7,7 @@ create extension if not exists "pgcrypto";
 create table if not exists journal_entries (
   id uuid primary key default gen_random_uuid(),
   created_at timestamptz not null default now(),
+  trade text not null default '',
   screenshot_url text,
   reason text not null default '',
   emotion text not null default '',
@@ -14,6 +15,9 @@ create table if not exists journal_entries (
   lesson text not null default '',
   score int not null default 0 check (score between 0 and 100)
 );
+
+-- Safe to re-run: adds the "trade" column if this table already existed from Sprint 1
+alter table journal_entries add column if not exists trade text not null default '';
 
 -- Execution checklist items (the 10-step pre-trade checklist)
 create table if not exists checklist_items (
@@ -44,7 +48,6 @@ insert into statistics_snapshot (id, data)
 values (1, '{}'::jsonb)
 on conflict (id) do nothing;
 
-<<<<<<< HEAD
 -- Sprint 2 — Mind: one check-in per trading session/day
 create table if not exists mind_checkins (
   id uuid primary key default gen_random_uuid(),
@@ -78,8 +81,6 @@ create table if not exists analysis_entries (
   notes text not null default ''
 );
 
-=======
->>>>>>> ec022f78c02aacb19aeb3d08cec633ca7a759ea8
 -- Row Level Security
 -- No login/auth in this app (single trader, personal use), so tables are
 -- readable/writable by anyone holding the Supabase anon key. That key ships
@@ -92,33 +93,34 @@ alter table journal_entries enable row level security;
 alter table checklist_items enable row level security;
 alter table knowledge_entries enable row level security;
 alter table statistics_snapshot enable row level security;
-<<<<<<< HEAD
 alter table mind_checkins enable row level security;
 alter table mind_notes enable row level security;
 alter table analysis_entries enable row level security;
-=======
->>>>>>> ec022f78c02aacb19aeb3d08cec633ca7a759ea8
 
+drop policy if exists "public read/write journal_entries" on journal_entries;
 create policy "public read/write journal_entries" on journal_entries
   for all using (true) with check (true);
 
+drop policy if exists "public read/write checklist_items" on checklist_items;
 create policy "public read/write checklist_items" on checklist_items
   for all using (true) with check (true);
 
+drop policy if exists "public read/write knowledge_entries" on knowledge_entries;
 create policy "public read/write knowledge_entries" on knowledge_entries
   for all using (true) with check (true);
 
+drop policy if exists "public read/write statistics_snapshot" on statistics_snapshot;
 create policy "public read/write statistics_snapshot" on statistics_snapshot
   for all using (true) with check (true);
-<<<<<<< HEAD
 
+drop policy if exists "public read/write mind_checkins" on mind_checkins;
 create policy "public read/write mind_checkins" on mind_checkins
   for all using (true) with check (true);
 
+drop policy if exists "public read/write mind_notes" on mind_notes;
 create policy "public read/write mind_notes" on mind_notes
   for all using (true) with check (true);
 
+drop policy if exists "public read/write analysis_entries" on analysis_entries;
 create policy "public read/write analysis_entries" on analysis_entries
   for all using (true) with check (true);
-=======
->>>>>>> ec022f78c02aacb19aeb3d08cec633ca7a759ea8

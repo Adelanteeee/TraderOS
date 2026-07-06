@@ -5,6 +5,9 @@ interface AppState {
   dashboard: DashboardSnapshot;
   toggleChecklistItem: (done: boolean) => void;
   setMentalScore: (score: number) => void;
+  setChecklistProgress: (done: number, total: number) => void;
+  setTodaysRiskPct: (pct: number) => void;
+  setTraderName: (name: string) => void;
 }
 
 export const useAppStore = create<AppState>((set) => ({
@@ -30,5 +33,17 @@ export const useAppStore = create<AppState>((set) => ({
   setMentalScore: (score) =>
     set((state) => ({
       dashboard: { ...state.dashboard, mentalScore: score }
+    })),
+  setChecklistProgress: (done, total) =>
+    set((state) => ({
+      dashboard: { ...state.dashboard, checklistDone: done, checklistTotal: total }
+    })),
+  setTodaysRiskPct: (pct) =>
+    set((state) => ({
+      dashboard: { ...state.dashboard, todaysRiskPct: pct }
+    })),
+  setTraderName: (name) =>
+    set((state) => ({
+      dashboard: { ...state.dashboard, traderName: name }
     }))
 }));
