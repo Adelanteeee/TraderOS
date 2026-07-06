@@ -8,11 +8,7 @@ export default defineConfig({
   // so the app needs to know it isn't at the domain root. Replace REPO-NAME
   // with your actual GitHub repository name before deploying. Leave it as
   // "/" if you deploy somewhere else (Vercel, Netlify, a custom domain, ...).
-<<<<<<< HEAD
-  base: "/",
-=======
-  base: "/TraderOS/",
->>>>>>> ec022f78c02aacb19aeb3d08cec633ca7a759ea8
+  base: "/REPO-NAME/",
   plugins: [
     react(),
     VitePWA({
@@ -25,11 +21,7 @@ export default defineConfig({
         theme_color: "#0A0B0D",
         background_color: "#0A0B0D",
         display: "standalone",
-<<<<<<< HEAD
         start_url: "/",
-=======
-        start_url: "./",
->>>>>>> ec022f78c02aacb19aeb3d08cec633ca7a759ea8
         icons: [
           { src: "icons/icon-192.png", sizes: "192x192", type: "image/png" },
           { src: "icons/icon-512.png", sizes: "512x512", type: "image/png" },
