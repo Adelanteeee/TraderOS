@@ -1,6 +1,5 @@
-HEAD
 import { Card } from "@/components/Card/Card";
-import { ConceptNode } from "./ConceptNode";
+import { ConceptNode } from "@/components/ConceptTree/ConceptNode";
 import { MARKET_TAXONOMY } from "./marketTaxonomy";
 
 export function Market() {
@@ -19,3 +18,6 @@ export function Market() {
           ))}
         </div>
       </Card>
+    </div>
+  );
+}

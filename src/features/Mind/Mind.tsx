@@ -1,4 +1,3 @@
-HEAD
 import { useState } from "react";
 import clsx from "clsx";
 import { CheckinForm } from "./CheckinForm";
@@ -39,4 +38,6 @@ export function Mind() {
         ))}
       </div>
       {tab === "checkin" ? <CheckinForm /> : <NotesList />}
-
+    </div>
+  );
+}
