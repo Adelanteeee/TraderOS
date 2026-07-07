@@ -3,11 +3,13 @@ import type { DashboardSnapshot } from "@/types";
 
 interface AppState {
   dashboard: DashboardSnapshot;
+  suggestedRiskPct: number | null;
   toggleChecklistItem: (done: boolean) => void;
   setMentalScore: (score: number) => void;
   setChecklistProgress: (done: number, total: number) => void;
   setTodaysRiskPct: (pct: number) => void;
   setTraderName: (name: string) => void;
+  setSuggestedRiskPct: (pct: number | null) => void;
 }
 
 export const useAppStore = create<AppState>((set) => ({
@@ -20,6 +22,7 @@ export const useAppStore = create<AppState>((set) => ({
     checklistDone: 0,
     checklistTotal: 10
   },
+  suggestedRiskPct: null,
   toggleChecklistItem: (done) =>
     set((state) => ({
       dashboard: {
@@ -45,5 +48,6 @@ export const useAppStore = create<AppState>((set) => ({
   setTraderName: (name) =>
     set((state) => ({
       dashboard: { ...state.dashboard, traderName: name }
-    }))
+    })),
+  setSuggestedRiskPct: (pct) => set({ suggestedRiskPct: pct })
 }));

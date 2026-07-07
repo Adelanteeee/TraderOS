@@ -6,6 +6,7 @@ import { Trash2, ImageIcon, TrendingUp, TrendingDown, Minus } from "lucide-react
 import clsx from "clsx";
 import { Card } from "@/components/Card/Card";
 import { Button } from "@/components/Button/Button";
+import { useAppStore } from "@/store/useAppStore";
 import {
   addJournalEntry,
   deleteJournalEntry,
@@ -22,6 +23,7 @@ const OUTCOME_META = {
 const schema = z.object({
   trade: z.string().min(1, "نام یا نماد معامله را وارد کن"),
   outcome: z.enum(["win", "loss", "breakeven"]),
+  riskPct: z.number().min(0).max(100),
   screenshotUrl: z.string().max(500).optional().default(""),
   reason: z.string().max(500).optional().default(""),
   emotion: z.string().max(200).optional().default(""),
@@ -35,12 +37,15 @@ type FormValues = z.infer<typeof schema>;
 export function Journal() {
   const [entries, setEntries] = useState<JournalEntry[]>([]);
   const [offline, setOffline] = useState(false);
+  const suggestedRiskPct = useAppStore((s) => s.suggestedRiskPct);
+  const setSuggestedRiskPct = useAppStore((s) => s.setSuggestedRiskPct);
 
   const { register, control, handleSubmit, reset, formState } = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: {
       trade: "",
       outcome: "win",
+      riskPct: suggestedRiskPct ?? 1,
       screenshotUrl: "",
       reason: "",
       emotion: "",
@@ -49,6 +54,24 @@ export function Journal() {
       score: 70
     }
   });
+
+  useEffect(() => {
+    if (suggestedRiskPct != null) {
+      reset({
+        trade: "",
+        outcome: "win",
+        riskPct: suggestedRiskPct,
+        screenshotUrl: "",
+        reason: "",
+        emotion: "",
+        mistake: "",
+        lesson: "",
+        score: 70
+      });
+      setSuggestedRiskPct(null);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     fetchJournalEntries()
@@ -179,6 +202,18 @@ export function Journal() {
           </div>
 
           <div className="flex flex-col gap-1">
+            <label className="text-xs text-text-muted">ریسک این معامله (%)</label>
+            <input
+              type="number"
+              step={0.1}
+              min={0}
+              max={100}
+              {...register("riskPct", { valueAsNumber: true })}
+              className="rounded-xl border border-border bg-surface-elevated p-2.5 text-sm text-text-primary num outline-none focus:border-accent"
+            />
+          </div>
+
+          <div className="flex flex-col gap-1">
             <label className="text-xs text-text-muted">امتیاز (۰ تا ۱۰۰)</label>
             <input
               type="number"
@@ -220,6 +255,9 @@ export function Journal() {
                   })()}
                   <span className="num text-xs text-text-muted bg-surface-elevated rounded-lg px-2 py-0.5">
                     امتیاز {entry.score}
+                  </span>
+                  <span className="num text-xs text-text-muted bg-surface-elevated rounded-lg px-2 py-0.5">
+                    ریسک {entry.riskPct}%
                   </span>
                   {entry.screenshotUrl && (
                     <a

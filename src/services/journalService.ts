@@ -6,6 +6,7 @@ export interface JournalEntry {
   createdAt: string;
   trade: string;
   outcome: "win" | "loss" | "breakeven";
+  riskPct: number;
   screenshotUrl: string;
   reason: string;
   emotion: string;
@@ -19,6 +20,7 @@ interface JournalEntryRow {
   created_at: string;
   trade: string;
   outcome: "win" | "loss" | "breakeven";
+  risk_pct: number;
   screenshot_url: string | null;
   reason: string;
   emotion: string;
@@ -33,6 +35,7 @@ function toEntry(row: JournalEntryRow): JournalEntry {
     createdAt: row.created_at,
     trade: row.trade,
     outcome: row.outcome,
+    riskPct: row.risk_pct,
     screenshotUrl: row.screenshot_url ?? "",
     reason: row.reason,
     emotion: row.emotion,
@@ -57,6 +60,7 @@ export async function addJournalEntry(
   const payload = {
     trade: input.trade,
     outcome: input.outcome,
+    risk_pct: input.riskPct,
     screenshot_url: input.screenshotUrl || null,
     reason: input.reason,
     emotion: input.emotion,
@@ -70,6 +74,17 @@ export async function addJournalEntry(
     throw error;
   }
   return toEntry(data as JournalEntryRow);
+}
+
+export async function fetchTodaysUsedRiskPct(): Promise<number> {
+  const startOfDay = new Date();
+  startOfDay.setHours(0, 0, 0, 0);
+  const { data, error } = await supabase
+    .from("journal_entries")
+    .select("risk_pct")
+    .gte("created_at", startOfDay.toISOString());
+  if (error) throw error;
+  return (data as { risk_pct: number }[]).reduce((sum, row) => sum + (row.risk_pct ?? 0), 0);
 }
 
 export async function deleteJournalEntry(id: string): Promise<void> {
