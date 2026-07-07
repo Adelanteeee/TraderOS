@@ -35,6 +35,27 @@ export function ConceptNode({ node, depth = 0 }: ConceptNodeProps) {
         )}
       </button>
       <AnimatePresence initial={false}>
+        {open && (node.details || node.example) && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.18 }}
+            className="overflow-hidden"
+          >
+            <div className="mx-1 mb-2 rounded-xl bg-surface-elevated p-3 flex flex-col gap-2">
+              {node.details && <p className="text-sm text-text-secondary leading-relaxed">{node.details}</p>}
+              {node.example && (
+                <p className="text-xs text-text-muted">
+                  <span className="text-accent font-medium">مثال: </span>
+                  {node.example}
+                </p>
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+      <AnimatePresence initial={false}>
         {open && hasChildren && (
           <motion.div
             initial={{ height: 0, opacity: 0 }}

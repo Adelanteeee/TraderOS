@@ -56,6 +56,8 @@ export interface MarketConcept {
   id: string;
   label: string;
   description: string;
+  details?: string;
+  example?: string;
   children?: MarketConcept[];
 }
 
