@@ -1,4 +1,5 @@
 import { supabase } from "@/lib/supabaseClient";
+import { enqueueOutbox } from "@/lib/outbox";
 import type { AnalysisEntry } from "@/types";
 
 interface AnalysisEntryRow {
@@ -37,19 +38,19 @@ export async function fetchAnalyses(): Promise<AnalysisEntry[]> {
 export async function addAnalysis(
   input: Omit<AnalysisEntry, "id" | "createdAt">
 ): Promise<AnalysisEntry> {
-  const { data, error } = await supabase
-    .from("analysis_entries")
-    .insert({
-      instrument: input.instrument,
-      timeframe: input.timeframe,
-      market_cycle_stage: input.marketCycleStage,
-      trend: input.trend,
-      bias: input.bias,
-      notes: input.notes
-    })
-    .select("*")
-    .single();
-  if (error) throw error;
+  const payload = {
+    instrument: input.instrument,
+    timeframe: input.timeframe,
+    market_cycle_stage: input.marketCycleStage,
+    trend: input.trend,
+    bias: input.bias,
+    notes: input.notes
+  };
+  const { data, error } = await supabase.from("analysis_entries").insert(payload).select("*").single();
+  if (error) {
+    await enqueueOutbox("analysis_entries", payload);
+    throw error;
+  }
   return toEntry(data as AnalysisEntryRow);
 }
 

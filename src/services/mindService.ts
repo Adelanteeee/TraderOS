@@ -1,4 +1,5 @@
 import { supabase } from "@/lib/supabaseClient";
+import { enqueueOutbox } from "@/lib/outbox";
 import type { MindCheckin, MindNote } from "@/types";
 
 interface MindCheckinRow {
@@ -55,20 +56,20 @@ export async function fetchTodaysCheckin(): Promise<MindCheckin | null> {
 export async function submitCheckin(
   input: Omit<MindCheckin, "id" | "createdAt">
 ): Promise<MindCheckin> {
-  const { data, error } = await supabase
-    .from("mind_checkins")
-    .insert({
-      mood: input.mood,
-      sleep_quality: input.sleepQuality,
-      focus: input.focus,
-      stress: input.stress,
-      confidence: input.confidence,
-      ready_to_trade: input.readyToTrade,
-      note: input.note
-    })
-    .select("*")
-    .single();
-  if (error) throw error;
+  const payload = {
+    mood: input.mood,
+    sleep_quality: input.sleepQuality,
+    focus: input.focus,
+    stress: input.stress,
+    confidence: input.confidence,
+    ready_to_trade: input.readyToTrade,
+    note: input.note
+  };
+  const { data, error } = await supabase.from("mind_checkins").insert(payload).select("*").single();
+  if (error) {
+    await enqueueOutbox("mind_checkins", payload);
+    throw error;
+  }
   return toCheckin(data as MindCheckinRow);
 }
 
@@ -82,12 +83,12 @@ export async function fetchNotes(): Promise<MindNote[]> {
 }
 
 export async function addNote(title: string, content: string): Promise<MindNote> {
-  const { data, error } = await supabase
-    .from("mind_notes")
-    .insert({ title, content })
-    .select("*")
-    .single();
-  if (error) throw error;
+  const payload = { title, content };
+  const { data, error } = await supabase.from("mind_notes").insert(payload).select("*").single();
+  if (error) {
+    await enqueueOutbox("mind_notes", payload);
+    throw error;
+  }
   return toNote(data as MindNoteRow);
 }
 

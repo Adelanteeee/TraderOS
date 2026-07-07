@@ -1,4 +1,5 @@
 import { supabase } from "@/lib/supabaseClient";
+import { enqueueOutbox } from "@/lib/outbox";
 
 export interface JournalEntry {
   id: string;
@@ -53,21 +54,21 @@ export async function fetchJournalEntries(): Promise<JournalEntry[]> {
 export async function addJournalEntry(
   input: Omit<JournalEntry, "id" | "createdAt">
 ): Promise<JournalEntry> {
-  const { data, error } = await supabase
-    .from("journal_entries")
-    .insert({
-      trade: input.trade,
-      outcome: input.outcome,
-      screenshot_url: input.screenshotUrl || null,
-      reason: input.reason,
-      emotion: input.emotion,
-      mistake: input.mistake,
-      lesson: input.lesson,
-      score: input.score
-    })
-    .select("*")
-    .single();
-  if (error) throw error;
+  const payload = {
+    trade: input.trade,
+    outcome: input.outcome,
+    screenshot_url: input.screenshotUrl || null,
+    reason: input.reason,
+    emotion: input.emotion,
+    mistake: input.mistake,
+    lesson: input.lesson,
+    score: input.score
+  };
+  const { data, error } = await supabase.from("journal_entries").insert(payload).select("*").single();
+  if (error) {
+    await enqueueOutbox("journal_entries", payload);
+    throw error;
+  }
   return toEntry(data as JournalEntryRow);
 }
 

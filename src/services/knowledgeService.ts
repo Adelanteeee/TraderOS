@@ -1,4 +1,5 @@
 import { supabase } from "@/lib/supabaseClient";
+import { enqueueOutbox } from "@/lib/outbox";
 
 export interface KnowledgeEntry {
   id: string;
@@ -28,12 +29,12 @@ export async function fetchKnowledgeEntries(): Promise<KnowledgeEntry[]> {
 }
 
 export async function addKnowledgeEntry(topic: string, content: string): Promise<KnowledgeEntry> {
-  const { data, error } = await supabase
-    .from("knowledge_entries")
-    .insert({ topic, content })
-    .select("*")
-    .single();
-  if (error) throw error;
+  const payload = { topic, content };
+  const { data, error } = await supabase.from("knowledge_entries").insert(payload).select("*").single();
+  if (error) {
+    await enqueueOutbox("knowledge_entries", payload);
+    throw error;
+  }
   return toEntry(data as KnowledgeEntryRow);
 }
 
